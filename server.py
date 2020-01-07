@@ -2,8 +2,10 @@ import socket
 import threading
 import time
 
+
 class Server:
     Clients = []
+    logs = {}
     def __init__(self,host,port):
         self.host = host
         self.port = port
@@ -15,13 +17,15 @@ class Server:
         print(f'server listen at {self.port}')
         threading.Thread(target=self.pinger).start()
 
+
+
     def pinger(self):
         while True:
             time.sleep(1)
             for client in Server.Clients:
                 try:
                     msg = 'ß'.encode('ISO-8859-1')
-                    # print('ß')
+
                     client.sock.send(msg)
                 except ConnectionResetError:
                     print('ConnectionResetError')
@@ -58,16 +62,21 @@ class Server:
             client_thread.start()
 
     def wait_for_user_nickname(self, client_sock):
-        new_user_id = client_sock.recv(1).decode('utf-8')
+        new_user_id = client_sock.recv(1024).decode('utf-8')
         print(new_user_id)
+
+        for msgid in Server.logs.keys():
+            msg = Server.logs[msgid]
+            client_sock.sendall(msg.encode('ISO-8859-1'))
+
+
         client = Client(client_sock,new_user_id)
         Server.Clients.append(client)
         client.start()
 
 
-
 class Client:
-    msgID=0
+    msgID = 0
     def __init__(self, sock, clientID):
         self.sock = sock
         self.clientID = clientID
@@ -78,10 +87,10 @@ class Client:
 
     def start(self):
         while self._run:
-            msg = ' '
+            msg = ''
             while True:
-                data=self.sock.recv(1).decode('ISO-8859-1')
-                msg+=data
+                data =  self.sock.recv(1).decode('ISO-8859-1')
+                msg += data
                 if data == 'Ø':
                     break
 
@@ -89,16 +98,18 @@ class Client:
 
             Server.logs[Client.msgID] = msg
 
-            if msg[0] == 'D':
+            if msg[0] in ['D','R']:
                 self.broadcast2Clients(msg)
 
             Client.msgID += 1
             pass
 
-    def broadcast2Clients(self, msg):
+    def broadcast2Clients(self,msg):
         msg = msg.encode('ISO-8859-1')
         for client in Server.Clients:
             client.sock.sendall(msg)
+
+
 
 
 if __name__ == '__main__':

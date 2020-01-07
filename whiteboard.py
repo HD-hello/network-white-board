@@ -2,9 +2,7 @@ from tkinter import *
 
 class WhiteBoard:
     drawing_tool = "line"
-    # Here we have the dictionary with the used colors to paint!
-    # Colors = {'b': 'blue', 'r': 'red', 'g': 'green', 'o': 'orange', 'y': 'yellow', 'c': 'cyan', 'p': 'purple1',
-    #           'd': 'black', 's': 'snow'}
+
     line_width = 2
 
     def draw_line(self, msgLst):
@@ -12,11 +10,18 @@ class WhiteBoard:
         color = msgLst[5]
         self.drawing_area.create_line(startX,startY,endX,endY,fill=color,width=self.line_width)
 
+    def draw_Rectangle(self, msgLst):
+        startX,startY,endX,endY = int(msgLst[1]),int(msgLst[2]),int(msgLst[3]),int(msgLst[4])
+        color = msgLst[5]
+        self.drawing_area.create_rectangle(startX,startY,endX,endY,fill=color,width=0)
+
     def draw_from_msg(self,msg):
         msgLst = msg.split()
         draw_type = msgLst[0]
         if draw_type == 'D':
             self.draw_line(msgLst)
+        if draw_type == 'R':
+            self.draw_Rectangle(msgLst)
         else:
             pass
 
