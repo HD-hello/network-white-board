@@ -16,6 +16,7 @@ class Client(Thread,WhiteBoard):
         self.isMouseDown = False
         self.x_pos = None
         self.y_pos = None
+        self.last_time = None
 
     def _init_mouse_event(self):
         self.drawing_area.bind("<Motion>", self.motion)
@@ -27,15 +28,24 @@ class Client(Thread,WhiteBoard):
         self.isMouseDown = True
         self.x_pos = event.x
         self.y_pos = event.y
+        self.last_time = time.time()
 
 
     def left_but_up(self,event=None):
         self.isMouseDown = False
         print(event.x,event.y)
+        self.last_time = None
 
 
     def motion(self,event=None):
         if self.isMouseDown == True:
+            now = time.time()
+            if now - self.last_time < 0.02:
+                print('too fast')
+                return
+
+            self.last_time = now
+
             msg = ('D',self.x_pos,self.y_pos,event.x,event.y,'red')
             self.conn.send_message(msg)
             self.x_pos = event.x
@@ -43,13 +53,13 @@ class Client(Thread,WhiteBoard):
 
 
     def run(self):
-        # print('run')aa
+
         while True:
             msg = self.conn.receive_msg()
+            self.draw_from_msg(msg)
+
             if msg == 'xxx':
                 pass
-            # print('i am running')
-            time.sleep(0.1)
 
 if __name__ == '__main__':
     client = Client()
