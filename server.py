@@ -98,7 +98,7 @@ class Client:
 
             Server.logs[Client.msgID] = msg
 
-            if msg[0] in ['D','R']:
+            if msg[0] in ['D','R','L','O','C','S','T']:
                 self.broadcast2Clients(msg)
 
             Client.msgID += 1
