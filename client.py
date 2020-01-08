@@ -26,6 +26,16 @@ class Client(Thread,WhiteBoard):
         self.drawing_area.bind("<ButtonPress-1>", self.left_but_down)
         self.drawing_area.bind("<ButtonRelease-1>", self.left_but_up)
 
+    def send_del_msg(self,event):
+        canvas_item_tuple = self.drawing_area.find_overlapping(event.x + 2, event.y + 2, event.x - 2, event.y - 2)
+        print(canvas_item_tuple)
+        if len(canvas_item_tuple) > 0:
+            to_delete_id = max(canvas_item_tuple)
+            tags = self.drawing_area.gettags(to_delete_id)
+            msgid = tags[0]
+            msg = ('Z', msgid)
+            self.conn.send_message(msg)
+
 
     def left_but_down(self,event=None):
         self.isMouseDown = True
@@ -34,6 +44,8 @@ class Client(Thread,WhiteBoard):
         self.last_time = time.time()
         self.line_x1, self.line_y1 = event.x,event.y
 
+        if self.isMouseDown == True and self.drawing_tool == 'eraser':
+            self.send_del_msg(event)
 
     def left_but_up(self,event=None):
         self.isMouseDown = False
@@ -76,6 +88,8 @@ class Client(Thread,WhiteBoard):
             self.x_pos = event.x
             self.y_pos = event.y
 
+        elif self.isMouseDown == True and self.drawing_tool == 'eraser':
+            self.send_del_msg(event)
 
     def run(self):
 
